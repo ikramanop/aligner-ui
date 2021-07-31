@@ -1,12 +1,71 @@
 <template>
   <div id="app">
-    <div id="nav">
-      <router-link to="/">Home</router-link> |
-      <router-link to="/about">About</router-link>
-    </div>
-    <router-view/>
+    <h1>Aligner-UI</h1>
+    <hr />
+    <Form v-if="status" v-on:validation-ok="validationOk" />
+    <Process
+      v-else-if="validation"
+      v-on:calculation-ok="calculationOk"
+      v-bind:uuid="uuid"
+    />
+    <Result v-else-if="calculation" />
+    <StatusUnhealty v-else />
   </div>
 </template>
+
+<script>
+import Form from "./components/Form.vue";
+import StatusUnhealty from "./components/StatusUnhealthy.vue";
+import Process from "./components/Process.vue";
+import Result from "./components/Result.vue";
+
+export default {
+  name: "App",
+
+  data() {
+    return {
+      status: false,
+      validation: false,
+      calculation: false,
+      uuid: "",
+    };
+  },
+
+  created() {
+    const requestOptions = {
+      method: "GET",
+      headers: { "Content-Type": "application/json" },
+    };
+
+    fetch(`${process.env.VUE_APP_BACKEND}/health/check`, requestOptions)
+      .then((response) => response.json())
+      .then((json) => {
+        console.log(json);
+        this.status = json.status;
+      });
+  },
+
+  components: {
+    Form,
+    StatusUnhealty,
+    Process,
+    Result,
+  },
+
+  methods: {
+    validationOk(uuid) {
+      this.uuid = uuid;
+      this.status = false;
+      this.validation = true;
+    },
+
+    calculationOk() {
+      this.validation = false;
+      this.calculation = true;
+    },
+  },
+};
+</script>
 
 <style>
 #app {
@@ -15,18 +74,6 @@
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #2c3e50;
-}
-
-#nav {
-  padding: 30px;
-}
-
-#nav a {
-  font-weight: bold;
-  color: #2c3e50;
-}
-
-#nav a.router-link-exact-active {
-  color: #42b983;
+  margin-top: 60px;
 }
 </style>
