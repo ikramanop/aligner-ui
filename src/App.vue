@@ -2,6 +2,7 @@
   <div id="app">
     <h1>Aligner-UI</h1>
     <hr />
+    <p v-if="status">Количество воркеров: {{ nodes }}</p>
     <Form v-if="status" v-on:validation-ok="validationOk" />
     <Process
       v-else-if="validation"
@@ -24,6 +25,7 @@ export default {
 
   data() {
     return {
+      nodes: 0,
       status: false,
       validation: false,
       calculation: false,
@@ -41,7 +43,12 @@ export default {
       .then((response) => response.json())
       .then((json) => {
         console.log(json);
-        this.status = json.status;
+        if (json.nodes.length == 0) {
+          this.status = false;
+        } else {
+          this.nodes = json.nodes.length;
+          this.status = true;
+        }
       });
   },
 
